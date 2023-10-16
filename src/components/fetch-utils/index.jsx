@@ -1,18 +1,35 @@
-export function getNewestNonEmptyPosts(posts) {
-    // Sort posts by created date
-    const sortedPosts = sortPostsDescending(posts);
+import { baseURL, apiKey } from "../../lib/api";
 
-    // Filter out empty posts (kind of sucks with a bunch of empty posts)
-    const nonEmptyPosts = sortedPosts.filter(post => post.body.trim() !== "");
+// Fetch utility function with authorization header
+export const fetchWithAuth = async (url) => {
+    const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+};
 
-    return nonEmptyPosts;
+export const fetchProfiles = async () => {
+    return fetchWithAuth(`${baseURL}/social/profiles`);
 }
-// I assume all the posts should be sorted by created date so this might come in handy for later.
-export function sortPostsDescending(posts) {
+
+export const fetchPostsByProfile = async (profileName) => {
+    return fetchWithAuth(`${baseURL}/social/profiles/${profileName}/posts`);
+}
+
+// Sort posts in descending order based on created date
+export const sortPostsDescending = (posts) => {
     return posts.sort((a, b) => new Date(b.created) - new Date(a.created));
 }
 
-// Limit the number of posts to a number
-export function limitPosts(posts, limit) {
+// Filter out posts with empty content
+export const getNewestNonEmptyPosts = (posts) => {
+    return sortPostsDescending(posts).filter(post => post.body.trim() !== "");
+}
+
+// Limit the number of returned posts
+export const limitPosts = (posts, limit) => {
     return posts.slice(0, limit);
 }

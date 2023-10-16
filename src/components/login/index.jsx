@@ -57,6 +57,7 @@ function LoginForm() {
       }
 
       localStorage.setItem("access_token", data.accessToken);
+      localStorage.setItem("username", data.name);
       setData(data);
       setIsSuccess(res.ok);
       navigateToHome();

@@ -1,6 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
-import { apiKey, baseURL } from "../../lib/api";
-import { getNewestNonEmptyPosts, sortPostsDescending, limitPosts } from '../fetch-utils';
+import { baseURL } from "../../lib/api";
+import {
+    fetchWithAuth,
+    getNewestNonEmptyPosts,
+    sortPostsDescending,
+    limitPosts,
+    fetchPostsByProfile,
+    fetchProfiles
+} from '../fetch-utils';
+
+// Common function to handle post fetching, sorting, and limiting
+const processPosts = async (url) => {
+    const data = await fetchWithAuth(url);
+    return limitPosts(getNewestNonEmptyPosts(data), 9);
+};
 
 export const useFetchPosts = () => {
     const [posts, setPosts] = useState([]);
@@ -8,36 +21,12 @@ export const useFetchPosts = () => {
     const [error, setError] = useState(null);
 
     const fetchData = useCallback(async () => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
-            const accessToken = apiKey;
-            const response = await fetch(`${baseURL}/social/posts`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log(data, 'data');
-
-            // Sort posts by created date
-            const sortedPosts = sortPostsDescending(data);
-
-            // Filter out empty posts
-            const nonEmptyPosts = getNewestNonEmptyPosts(sortedPosts);
-
-
-            // Limit to 9
-            const limitedPosts = limitPosts(nonEmptyPosts, 9);
-
-            setPosts(limitedPosts);
-        } catch (error) {
-            setError(error);
+            const posts = await processPosts(`${baseURL}/social/posts`);
+            setPosts(posts);
+        } catch (err) {
+            setError(err);
         } finally {
             setIsLoading(false);
         }
@@ -52,39 +41,16 @@ export const useFetchCurrentUserPosts = (username, jwt) => {
     const [error, setError] = useState(null);
 
     const fetchCurrentUserPosts = useCallback(async () => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
-            const response = await fetch(`${baseURL}/social/profiles/${username}/posts`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            // Sort posts by created
-            const sortedPosts = sortPostsDescending(data);
-
-            // Filter out empty posts
-            const nonEmptyPosts = getNewestNonEmptyPosts(sortedPosts);
-
-            // Limit to 9
-            const limitedPosts = limitPosts(nonEmptyPosts, 9);
-
-            setPosts(limitedPosts);
-        } catch (error) {
-            setError(error);
+            const posts = await processPosts(`${baseURL}/social/profiles/${username}/posts`);
+            setPosts(posts);
+        } catch (err) {
+            setError(err);
         } finally {
             setIsLoading(false);
         }
-    }, [username, jwt]);
-
-    console.log(username);
+    }, [username]);
 
     useEffect(() => {
         if (username && jwt) {
@@ -94,3 +60,20 @@ export const useFetchCurrentUserPosts = (username, jwt) => {
 
     return { posts, isLoading, error, username };
 };
+
+const fetchAllPostsWithAuthors = async () => {
+    const profiles = await fetchProfiles();
+    const postsPromises = profiles.map(profile => {
+        return fetchPostsByProfile(profile.name).then(posts => {
+            return posts.map(post => ({ ...post, author: profile.name }));
+        });
+    });
+
+    return (await Promise.all(postsPromises)).flat();
+}
+
+fetchAllPostsWithAuthors().then(posts => {
+    console.log(posts);
+}).catch(error => {
+    console.error('Error fetching posts:', error);
+});

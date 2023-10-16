@@ -8,12 +8,19 @@ export function PostForm({ onAddPost }) {
     const [body, setBody] = useState('');
     const [tags, setTags] = useState('');
     const [media, setMedia] = useState('');
-    const [author, setAuthor] = useState('');
 
     const storedUsername = localStorage.getItem('username');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const postPayload = {
+            title,
+            body,
+            tags: tags.split(',').map((tag) => tag.trim()),
+            media,
+            author: { name: storedUsername },
+        };
 
         try {
             const accessToken = apiKey;
@@ -23,25 +30,12 @@ export function PostForm({ onAddPost }) {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    title,
-                    body,
-                    tags: tags.split(',').map((tag) => tag.trim()),
-                    media,
-                    author,
-                }),
+                body: JSON.stringify(postPayload),
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            const newPost = await response.json();
-
-            // Include correct author information
-            newPost.author = {
-                name: storedUsername
-            };
 
             // Once the post is created, fetch the updated list
             const updatedPostsResponse = await fetch(`${baseURL}/social/profiles/${storedUsername}/posts`, {
@@ -65,7 +59,6 @@ export function PostForm({ onAddPost }) {
             setBody('');
             setTags('');
             setMedia('');
-            setAuthor('');
         } catch (error) {
             console.error('Error:', error);
         }
@@ -73,7 +66,6 @@ export function PostForm({ onAddPost }) {
 
     return (
         <StyledPostForm
-            onSubmit={handleSubmit}
             title={title}
             body={body}
             tags={tags}
