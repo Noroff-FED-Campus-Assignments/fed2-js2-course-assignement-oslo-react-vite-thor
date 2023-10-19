@@ -14,9 +14,11 @@ export default function PostForm({ onAddPost }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    //yes we know the accesstoken should be invisible but this is a test project and we
+    // are not going to use this in production so we are just going to leave it like this for now :)
     try {
-      const accessToken = localStorage.getItem("access_token");
+      const accessToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTkyNCwibmFtZSI6InZpZmlrc2EiLCJlbWFpbCI6Ijg5MTc3MzMtbGFzdEBzdHVkLm5vcm9mZi5ubyIsImF2YXRhciI6bnVsbCwiYmFubmVyIjpudWxsLCJpYXQiOjE2OTc0ODY5MTJ9.mUmdtDvnQmeMm7nMR_5mUS8kLkZYQ0NGsNWPX66q6G4";
       const response = await fetch(`${baseURL}/social/posts`, {
         method: "POST",
         headers: {
@@ -42,6 +44,7 @@ export default function PostForm({ onAddPost }) {
       newPost.author = {
         name: storedUsername,
       };
+      window.location.reload();
 
       // Once the post is created, fetch the updated list
       const updatedPostsResponse = await fetch(
@@ -54,6 +57,7 @@ export default function PostForm({ onAddPost }) {
         }
       );
 
+      window.location.reload();
       if (!updatedPostsResponse.ok) {
         throw new Error(`HTTP error! status: ${updatedPostsResponse.status}`);
       }

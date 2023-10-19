@@ -7,7 +7,6 @@ function LoginForm() {
   const [data, setData] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
-
   const navigateToHome = () => {
     setTimeout(() => {
       navigate({ to: "/" });

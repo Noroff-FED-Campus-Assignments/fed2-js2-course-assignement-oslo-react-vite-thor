@@ -4,13 +4,12 @@ import "./App.css";
 function App() {
   return (
     <>
-
       <main>
         <Outlet />
       </main>
 
       <footer>
-        <small>Created with ❤️ by You</small>
+        <small>Created with ❤️ by Thor</small>
       </footer>
     </>
   );

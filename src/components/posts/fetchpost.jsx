@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useEffect } from "react";
 import { baseURL } from "../../lib/api";
 import {
@@ -10,11 +11,15 @@ export const useFetchPosts = () => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        navigate({ to: "/login" });
+      }
       const response = await fetch(`${baseURL}/social/posts`, {
         method: "GET",
         headers: {

@@ -9,7 +9,7 @@ export const baseURL = "https://api.noroff.dev/api/v1";
 function updateOptions(options) {
   const update = { ...options };
 
-  if (localStorage.getItem("jwt")) {
+  if (localStorage.getItem("access_token")) {
     update.headers = {
       ...update.headers,
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,

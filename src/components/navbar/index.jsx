@@ -11,6 +11,13 @@ export default function Navigation() {
     setDropdownVisible(!isDropdownVisible);
   };
 
+  const handleLogout = () => {
+    console.log("Logging out");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_name");
+    console.log("Logged out");
+  };
+
   useEffect(() => {
     const handleResize = () => {
       setIsLargeScreen(window.innerWidth >= 768);
@@ -64,6 +71,11 @@ export default function Navigation() {
                 <Link to={item.href}>{item.label}</Link>
               </li>
             ))}
+            <li>
+              <Link to={"/login"} onClick={() => handleLogout()}>
+                Logout
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
