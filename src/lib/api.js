@@ -1,5 +1,6 @@
 import { API_URL } from "./constants";
 
+export const baseURL = "https://api.noroff.dev/api/v1";
 /**
  * Helper function to add the
  * @param {Object} options - HTTP header options
@@ -8,13 +9,13 @@ import { API_URL } from "./constants";
 function updateOptions(options) {
   const update = { ...options };
 
-  if (localStorage.getItem("jwt")) {
+  if (localStorage.getItem("access_token")) {
     update.headers = {
       ...update.headers,
-      Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     };
   }
-
+  //**localStorage.getItem("jwt")*/
   return update;
 }
 
